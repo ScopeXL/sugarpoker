@@ -1,0 +1,26 @@
+<div id="room">
+    <div class="container" id="room-setup">
+        <div class="row app-title">
+            <div class="col-xs-12">
+                <div class="poker-title">
+                    Planning Poker
+                </div>
+                <div class="poker-subtitle">
+                    Enter the room you would like to join
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="room-setup">
+                    <form ng-submit="join()">
+                        <div class="room">
+                            <input type="text" ng-model="room" placeholder="Room" />
+                        </div>
+                        <button type="submit" class="join">Next</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

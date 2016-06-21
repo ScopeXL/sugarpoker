@@ -1,0 +1,11 @@
+{
+  "name": "planningpoker",
+  "version": "0.0.1",
+  "description": "Planning Poker",
+  "author": "Ed Roesch <eroesch@sugarcrm.com> (http://www.edroesch.com)",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "bower": "^1.7.9"
+  }
+}

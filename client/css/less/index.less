@@ -1,0 +1,458 @@
+// out: ../index.css, sourcemap: true, compress: false
+body {
+    background: #1f1f1f;
+    color: #999;
+    font-size: 14px;
+}
+
+#main {
+    margin: 30px;
+}
+
+#room {
+    #room-setup {
+        text-align: center;
+        font-size: 3.5em;
+        margin-top: 40px;
+
+        .app-title {
+            margin-bottom: 20px;
+
+            .poker-title {
+                font-size: 40px;
+            }
+
+            .poker-subtitle {
+                font-size: 16px;
+
+                .room-name {
+                    color: #FFF;
+                }
+            }
+        }
+
+        input {
+            padding: 6px 10px;
+            font-size: 0.7em;
+            background: #3a3a3a;
+            color: #FFF;
+            border: 0;
+        }
+
+        .join {
+            margin-top: 30px;
+            padding: 10px 18px;
+            background: #cc7b19;
+            border-radius: 3px;
+            border: none;
+            box-shadow: inset 0 1px 0 #e7993b;
+            color: #FFF;
+            text-shadow: rgba(0, 0, 0, 0.4) 0 -1px 1px, rgba(0, 0, 0, 0.2) 0 0 15px;
+            line-height: 23.6444px;
+            font-family: Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            font-size: 0.5em;
+
+            &:hover {
+                cursor: pointer;
+                background: #e59029;
+            }
+        }
+    }
+
+    #room-details {
+        display: none;
+
+        .users {
+            margin-top: 70px;
+            text-align: center;
+
+            .user-container {
+                display: inline-block;
+                vertical-align: top;
+                width: 200px;
+                margin: 5px;
+            }
+
+            /* entire container, keeps perspective */
+            .flip-container {
+            	perspective: 1000px;
+                margin: 0 auto;
+                -webkit-touch-callout: none; /* iOS Safari */
+                -webkit-user-select: none;   /* Chrome/Safari/Opera */
+                -khtml-user-select: none;    /* Konqueror */
+                -moz-user-select: none;      /* Firefox */
+                -ms-user-select: none;       /* Internet Explorer/Edge */
+                user-select: none;           /* Non-prefixed version, currently
+                                                not supported by any browser */
+            }
+        	/* flip the pane when hovered */
+        	/*.flip-container:hover .flipper, .flip-container.hover .flipper {
+        		transform: rotateY(180deg);
+        	}*/
+            /* flip the pane when flip class is triggered */
+            .flip-container.flip .flipper {
+                transform: rotateY(180deg);
+            }
+
+            .flip-container, .front, .back {
+                width: 155px;
+                height: 200px;
+            }
+
+            /* flip speed goes here */
+            .flipper {
+            	transition: 1.5s;
+            	transform-style: preserve-3d;
+
+            	position: relative;
+            }
+
+            /* hide back of pane during swap */
+            .front, .back {
+            	backface-visibility: hidden;
+
+            	position: absolute;
+            	top: 0;
+            	left: 0;
+
+                background: #ddd;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                width: 155px;
+                height: 200px;
+                margin: 0 auto;
+                text-align: center;
+                line-height: 200px;
+            }
+
+            /* front pane, placed above back */
+            .front {
+            	z-index: 2;
+            	/* for firefox 31 */
+            	transform: rotateY(0deg);
+                font-size: 25px;
+
+                &.local {
+                    cursor: pointer;
+                }
+
+                .user-voted {
+                    font-size: 40px;
+                }
+            }
+
+            /* back, initially hidden pane */
+            .back {
+            	transform: rotateY(180deg);
+                font-size: 100px;
+            }
+
+            .username {
+                margin-top: 5px;
+                //margin: 5px auto;
+                //text-align: left;
+                //width: 155px;
+
+                .control {
+                    &:hover {
+                        cursor: pointer;
+                    }
+                }
+            }
+
+            .video-container {
+                margin: 15px auto;
+                margin-bottom: 0;
+                position: relative;
+
+                .audio-call-container {
+                    height: 150px;
+                    font-size: 100px;
+                    line-height: 150px;
+                }
+
+                video {
+                    max-width: 200px;
+
+                    &.mirror {
+                        transform: rotateY(180deg);
+                        -webkit-transform:rotateY(180deg);
+                        -moz-transform:rotateY(180deg);
+                    }
+                }
+
+                .user-info {
+                    position: absolute;
+                    //bottom: 0;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 20px;
+                    background: rgba(0, 0, 0, 0.6);
+                    color: #999;
+                }
+
+                .user-muted {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 2px;
+                    background: red;
+                }
+
+                .video-option {
+                    display: none;
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 24px;
+                    font-size: 20px;
+
+                    &:hover {
+                        cursor: pointer;
+                    }
+
+                    &.webcam {
+                        position: absolute;
+                        top: ~"calc(50% - 24px)";
+                        //left: ~"calc(50% - 24px)";
+                        right: 10px;
+                        background: #d9534f;
+                        color: #FFF;
+
+                        &:hover {
+                            background: #c9302c;
+                        }
+                    }
+                    &.microphone {
+                        position: absolute;
+                        top: ~"calc(50% - 24px)";
+                        //left: ~"calc(50% - 10px)";
+                        left: 10px;
+                        background: #5cb85c;
+                        color: #FFF;
+
+                        &:hover {
+                            background: #449d44;
+                        }
+
+                        &.muted {
+                            background: #d9534f;
+
+                            &:hover {
+                                background: #c9302c;
+                            }
+                        }
+                    }
+
+                    i.fa {
+                        line-height: 48px;
+                    }
+                }
+
+                &:hover {
+                    .option {
+                        display: block;
+                    }
+                }
+            }
+
+            .user-container {
+
+                .user-options {
+                    display: none;
+                }
+
+                &.local {
+                    .video-container {
+                        &:hover {
+                            .video-option {
+                                display: block;
+                            }
+                        }
+                    }
+
+                    .user-options {
+                        display: block;
+                        font-size: 20px;
+                        margin-top: 5px;
+
+                        .option {
+                            position: relative;
+                            display: inline-block;
+                            width: 48px;
+                            height: 48px;
+                            border-radius: 24px;
+                            background: #5cb85c;
+                            color: #FFF;
+
+                            i.fa {
+                                line-height: 48px;
+                            }
+
+                            &:hover {
+                                background: #449d44;
+                                cursor: pointer;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .topic-container {
+            height: 60px;
+
+            .topic {
+                font-size: 2.5em;
+                //position: absolute;
+                //top: 0;
+                //left: 0;
+                //width: 100%;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+
+                .topic-text {
+                    &:hover {
+                        cursor: pointer;
+                    }
+                }
+
+                #input-topic {
+                    height: 2.5em;
+                    background: #3a3a3a;
+                    color: #FFF;
+                    border: 0;
+                }
+            }
+        }
+
+        .options {
+            border-top: 1px solid #444;
+
+            .option {
+                display: inline-block;
+                padding: 3px 10px;
+                margin-left: -5px;
+                border-right: 1px solid #444;
+
+                &:last-child {
+                    border-right: none;
+                }
+
+                a, a:link, a:active, a:visited {
+                    color: #999;
+
+                    &:hover {
+                        cursor: pointer;
+                        color: #cc7b19;
+                        text-decoration: none;
+                    }
+                }
+            }
+        }
+
+        timer.countdown {
+            font-size: 2.0em;
+            position: relative;
+            cursor: pointer;
+
+            .progress {
+                position: relative;
+                height: 5px;
+                background: #555;
+
+                .progress-bar {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    height: 100%;
+                    width: 0;
+                    background: #FFF;
+
+                    &.warning {
+                        background: #f0ad4e;
+                    }
+
+                    &.danger {
+                        background: #d9534f;
+                    }
+                }
+            }
+        }
+
+        .countdown-container {
+            height: 60px;
+
+            #input-countdown {
+                height: 2.0em;
+                background: #3a3a3a;
+                color: #FFF;
+                border: 0;
+            }
+
+            .timer-controls {
+                margin-top: 10px;
+
+                .control {
+                    &:hover {
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+
+    .grouping {
+        margin: 0 25px;
+        margin-bottom: 15px;
+
+        &.no-vote {
+            margin-top: 25px;
+            margin-bottom: 0;
+
+            .vote-abstain {
+                color: #d9534f;
+            }
+
+            .vote-unknown {
+
+            }
+        }
+
+        .btn {
+            font-size: 20px;
+        }
+    }
+
+    #disconnect-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 9001;
+
+        .banner {
+            margin: 150px 20%;
+            padding: 10px;
+            font-size: 25px;
+            background: #000;
+            border: 1px solid #444;
+            text-align: center;
+
+            .subtitle {
+                margin-top: 10px;
+                font-size: 15px;
+            }
+        }
+    }
+}
+
+#invite {
+
+}
