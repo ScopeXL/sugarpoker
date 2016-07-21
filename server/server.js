@@ -10,7 +10,7 @@ var debug = require('./lib/debug')(environment);
 var db = require('./lib/db')();
 
 // Port which the HTTP Server listens for socket connections
-var httpPort = 3000;
+var httpPort = 3001;
 // Port which peerjs listens for connections
 var peerPort = 9001;
 
