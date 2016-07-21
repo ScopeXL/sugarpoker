@@ -5,6 +5,7 @@ appControllers.controller('RoomCtrl', [
     'SocketSvc',
     'PeerSvc',
     '$routeParams',
+    '$location',
     '$rootScope',
 function(
     $scope,
@@ -13,6 +14,7 @@ function(
     SocketSvc,
     PeerSvc,
     $routeParams,
+    $location,
     $rootScope) {
         // Set the username from localStorage if it exists
         $scope.username = localStorage.getItem('username');
@@ -25,6 +27,11 @@ function(
         $scope.progressLevel = 'normal';
         // Set the room name
         $scope.roomId = $routeParams.roomId;
+
+        // If no roomId is specified, show room textbox on DOM
+        if (_.isUndefined($scope.roomId)) {
+            $scope.noRoom = true;
+        }
 
         $scope.$on('timer-reset', function(ev) {
             debug.log('Timer was reset');
@@ -45,27 +52,33 @@ function(
             // calculate number of seconds remaining
             var secondsRemaining = data.millis / 1000;
 
-            // calculate percentage left
-            var percentageRemaining = Math.ceil((secondsRemaining / $scope.timerCountdown) * 100);
-            //debug.log(percentageRemaining);
-
-            if (percentageRemaining <= 30) {
-                // show danger
-                if (!_.isEqual($scope.progressLevel, 'danger')) {
-                    $scope.progressLevel = 'danger';
-                    $scope.$apply();
-                }
-            } else if (percentageRemaining <= 50) {
-                // show warning
-                if (!_.isEqual($scope.progressLevel, 'warning')) {
-                    $scope.progressLevel = 'warning';
-                    $scope.$apply();
-                }
+            if (secondsRemaining <= 0) {
+                // timer is up
+                var audio = new Audio('sounds/ding.wav');
+                audio.play();
             } else {
-                // consider everything else as normal
-                if (!_.isEqual($scope.progressLevel, 'normal')) {
-                    $scope.progressLevel = 'normal';
-                    //$scope.$apply();
+                // calculate percentage left
+                var percentageRemaining = Math.ceil((secondsRemaining / $scope.timerCountdown) * 100);
+                //debug.log(percentageRemaining);
+
+                if (percentageRemaining <= 30) {
+                    // show danger
+                    if (!_.isEqual($scope.progressLevel, 'danger')) {
+                        $scope.progressLevel = 'danger';
+                        $scope.$apply();
+                    }
+                } else if (percentageRemaining <= 50) {
+                    // show warning
+                    if (!_.isEqual($scope.progressLevel, 'warning')) {
+                        $scope.progressLevel = 'warning';
+                        $scope.$apply();
+                    }
+                } else {
+                    // consider everything else as normal
+                    if (!_.isEqual($scope.progressLevel, 'normal')) {
+                        $scope.progressLevel = 'normal';
+                        //$scope.$apply();
+                    }
                 }
             }
         });
@@ -77,7 +90,10 @@ function(
 
         // Join the room
         $scope.join = function() {
-            SocketSvc.connect($scope.username, $routeParams.roomId);
+            if (_.isUndefined($routeParams.roomId) || $scope.noRoom) {
+                $location.path('/' + $scope.roomId);
+            }
+            SocketSvc.connect($scope.username, $scope.roomId);
         };
 
         // Start/Pause the timer

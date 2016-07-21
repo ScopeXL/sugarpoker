@@ -6,7 +6,7 @@
                     Planning Poker
                 </div>
                 <div class="poker-subtitle">
-                    Joining: <span class="room-name">{{roomId}}</span>
+
                 </div>
             </div>
         </div>
@@ -14,10 +14,18 @@
             <div class="col-xs-12">
                 <div class="room-setup">
                     <form ng-submit="join()">
+                        <div class="room">
+                            <div ng-show="noRoom">
+                                <input type="text" ng-model="roomId" ng-change="changeRoom()" placeholder="Room" />
+                            </div>
+                            <div ng-show="!noRoom" class="room-info">
+                                Joining: <span class="room-name" ng-click="noRoom = true" title="Click to Change" data-placement="right" tooltip>{{roomId}}</span>
+                            </div>
+                        </div>
                         <div class="name">
                             <input type="text" ng-model="username" ng-change="changeUsername()" placeholder="Your Name" />
                         </div>
-                        <button type="submit" class="join">Join</button>
+                        <button type="submit" class="join{{!roomId ? ' disabled' : ''}}" ng-disabled="!roomId">Join</button>
                     </form>
                 </div>
             </div>
@@ -107,17 +115,28 @@
                         <i class="fa {{user.get('muted') ? 'fa-microphone-slash' : 'fa-microphone'}} control"></i>
                     </div>
                 </div>
-                <div class="username" ng-show="!user.get('activeCall')">
-                    {{user.get('username')}}
+                <div class="user-details" ng-show="!user.get('activeCall')">
+                    <div class="username" ng-show="!user.get('activeCall')" data-original-title="{{user.get('username')}}" tooltip>
+                        {{user.get('username')}}
+                    </div>
+                    <div class="user-options">
+                        <div class="option" ng-click="toggleCall('video')" title="Start Video Call" tooltip>
+                            <i class="fa fa-video-camera"></i>
+                        </div>
+                        <div class="option" ng-click="toggleCall('audio')" title="Start Audio Call" tooltip>
+                            <i class="fa fa-microphone"></i>
+                        </div>
+                    </div>
                 </div>
-                <div class="user-options" ng-show="!user.get('activeCall')">
+
+                <!--<div class="user-options" ng-show="!user.get('activeCall')">
                     <div class="option" ng-click="toggleCall('video')" title="Start Video Call" tooltip>
                         <i class="fa fa-video-camera control"></i>
                     </div>
                     <div class="option" ng-click="toggleCall('audio')" title="Start Audio Call" tooltip>
                         <i class="fa fa-microphone control"></i>
                     </div>
-                </div>
+                </div>-->
             </div>
         </div>
     </div>

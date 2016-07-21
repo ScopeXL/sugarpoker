@@ -14,7 +14,7 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
 
         // Initialize the socket connection
         function initSocket(username, roomId) {
-            socket = io('https://sugar.roesch.io', {
+            socket = io('https://poker.roesch.io', {
                 reconnection: true,
                 query: 'room=' + roomId + '&username=' + username,
                 path: '/socket/socket.io'

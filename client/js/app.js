@@ -8,12 +8,12 @@ var app = angular.module('poker', ['ngRoute', 'timer', 'appControllers']);
 var appControllers = angular.module('appControllers', []);
 
 // Setup routes
-app.config(['$routeProvider',
-    function($routeProvider) {
+app.config(['$routeProvider', '$locationProvider',
+    function($routeProvider, $locationProvider) {
         $routeProvider.
         when('/', {
-            templateUrl: 'partials/main.html',
-            controller: 'MainCtrl'
+            templateUrl: 'partials/room.html',
+            controller: 'RoomCtrl'
         }).
         when('/:roomId', {
             templateUrl: 'partials/room.html',
@@ -22,6 +22,9 @@ app.config(['$routeProvider',
         otherwise({
             redirectTo: '/'
         });
+
+        // use the HTML5 History API
+        //$locationProvider.html5Mode(true);
     }
 ]);
 

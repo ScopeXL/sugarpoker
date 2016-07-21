@@ -31,7 +31,8 @@
     "humanize-duration": "^3.8.0",
     "peerjs": "^0.3.14",
     "webrtc-adapter": "gh-pages",
-    "font-awesome": "^4.6.3"
+    "font-awesome": "^4.6.3",
+    "less": "^2.7.1"
   },
   "resolutions": {
     "moment": "^2.13.0",
