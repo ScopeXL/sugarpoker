@@ -32,111 +32,149 @@
         </div>
     </div>
     <div class="container-fluid" id="room-details">
-        <div class="row topic-container">
-            <div class="col-xs-9">
-                <div class="topic" ng-show="!showEditTopic" ng-click="handleEditTopic(true)">
-                    <div class="topic-text">{{room.get('topic') ? room.get('topic') : 'Edit Topic...'}}</div>
-                </div>
-                <div class="topic" ng-show="showEditTopic">
-                    <input id="input-topic" class="form-control" type="text" ng-model="room.details.topic" ng-change="editTopic()" ng-enter="handleEditTopic(false)" ng-blur="handleEditTopic(false)" placeholder="Edit Topic..." />
-                </div>
-            </div>
-            <div class="col-xs-3">
-                <div class="countdown-container">
-                    <div ng-show="!editCountdown" class="timer-controls pull-right">
-                        <span ng-show="!timerRunning" ng-click="pauseTimer(false)" class="glyphicon glyphicon-play control"></span>
-                        <span ng-show="timerRunning" ng-click="pauseTimer(true)" class="glyphicon glyphicon-pause control"></span>
-                    </div>
-                    <timer ng-show="!editCountdown" ng-click="handleEditCountdown(true)" countdown="timerCountdown" interval="1000" autostart="false" class="countdown">
-                        <span class="text-{{progressLevel}}">{{mminutes}}:{{sseconds}}</span>
-                        <div class="progress">
-                            <div class="progress-bar {{progressLevel}}" style="width: {{progressBar}}%;"></div>
-                        </div>
-                    </timer>
-                    <div class="countdown-edit" ng-show="editCountdown">
-                        <input id="input-countdown" ng-model="customCountdown" ng-blur="handleEditCountdown(false)" class="form-control" type="text" placeholder="MM:SS" />
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="row">
-            <div class="col-xs-12">
-                <div class="options text-right">
-                    <div class="option" ng-show="room.get('activeVote')">
-                        <a ng-click="revealVote()">Reveal Results</a>
+            <div class="col-xs-12 col-sm-12 col-md-9">
+                <div class="row topic-container">
+                    <div class="col-xs-9">
+                        <div class="topic" ng-show="!showEditTopic" ng-click="handleEditTopic(true)" title="Click to edit topic" tooltip>
+                            <div class="topic-text">{{room.get('topic') ? room.get('topic') : 'Edit Topic...'}}</div>
+                        </div>
+                        <div class="topic" ng-show="showEditTopic">
+                            <input id="input-topic" class="form-control" type="text" ng-model="room.details.topic" ng-change="editTopic()" ng-enter="handleEditTopic(false, true)" ng-blur="handleEditTopic(false)" placeholder="Edit Topic..." />
+                        </div>
                     </div>
-                    <div class="option">
-                        <a ng-click="inviteOthers()">Invite Others</a>
-                    </div>
-                    <div class="option">
-                        <a ng-click="resetVote()">Reset</a>
-                    </div>
-                    <div class="option">
-                        <a ng-click="startVote()">Call for Vote</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="users">
-            <div class="user-container{{user.get('socketId') == socketId ? ' local' : ''}}" ng-repeat="user in users">
-                <div class="flip-container{{(voteEnd && user.get('hasVoted')) || reveal ? ' flip' : ''}}">
-                    <div class="flipper">
-                        <div class="front{{user.get('socketId') == socketId ? ' local' : ''}}" ng-click="editVote(user.get('socketId'))">
-                            <div ng-show="!user.get('hasVoted')">Poker</div>
-                            <div ng-show="user.get('hasVoted')" class="user-voted">
-                                <span class="glyphicon glyphicon-ok"></span>
+                    <div class="col-xs-3">
+                        <div class="countdown-container">
+                            <div ng-show="!editCountdown" class="timer-controls pull-right">
+                                <span ng-show="!timerRunning" ng-click="pauseTimer(false)" class="glyphicon glyphicon-play control" title="Start Timer" tooltip></span>
+                                <span ng-show="timerRunning" ng-click="pauseTimer(true)" class="glyphicon glyphicon-pause control" title="Pause Timer" tooltip></span>
+                            </div>
+                            <timer ng-show="!editCountdown" ng-click="handleEditCountdown(true)" countdown="timerCountdown" interval="1000" autostart="false" class="countdown">
+                                <span class="text-{{progressLevel}}" title="Click to edit timer" data-placement="left" tooltip>{{mminutes}}:{{sseconds}}</span>
+                                <div class="progress">
+                                    <div class="progress-bar {{progressLevel}}" style="width: {{progressBar}}%;"></div>
+                                </div>
+                            </timer>
+                            <div class="countdown-edit" ng-show="editCountdown">
+                                <input id="input-countdown" ng-model="customCountdown" ng-blur="handleEditCountdown(false)" class="form-control" type="text" placeholder="MM:SS" />
                             </div>
                         </div>
-                        <div class="back">
-                            <div>{{user.get('vote')}}</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12">
+                        <div class="options text-right">
+                            <div class="option topic-link pull-left">
+                                <a ng-href="https://sugarcrm.atlassian.net/browse/{{room.get('topic')}}" target="_blank">
+                                    {{room.get('topicData').summary ? room.get('topicData').summary : ''}}
+                                </a>
+                            </div>
+                            <div class="option" ng-show="room.get('activeVote')">
+                                <a ng-click="revealVote()">Reveal Results</a>
+                            </div>
+                            <div class="option">
+                                <a ng-click="inviteOthers()">Invite Others</a>
+                            </div>
+                            <div class="option">
+                                <a ng-click="resetVote()">Reset</a>
+                            </div>
+                            <div class="option">
+                                <a ng-click="startVote()">Call for Vote</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="video-container" ng-show="user.get('activeCall')">
-                    <div ng-show="user.get('activeWebcam')">
-                        <div class="local-video" ng-if="socketId === user.get('socketId')">
-                            <video class="mirror" id="video-local" autoplay muted></video>
+                <div class="users">
+                    <div class="user-container{{user.get('socketId') == socketId ? ' local' : ''}}" ng-repeat="user in users">
+                        <div class="flip-container{{(voteEnd && user.get('hasVoted')) || reveal ? ' flip' : ''}}">
+                            <div class="flipper">
+                                <div class="front{{user.get('socketId') == socketId ? ' local' : ''}}" ng-click="editVote(user.get('socketId'))">
+                                    <div ng-show="!user.get('hasVoted')">Poker</div>
+                                    <div ng-show="user.get('hasVoted')" class="user-voted">
+                                        <span class="glyphicon glyphicon-ok"></span>
+                                    </div>
+                                </div>
+                                <div class="back">
+                                    <div>{{user.get('vote')}}</div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="remote-video" ng-if="socketId !== user.get('socketId')">
-                            <video id="video-{{user.get('socketId')}}" autoplay></video>
+                        <div class="video-container" ng-show="user.get('activeCall')">
+                            <div ng-show="user.get('activeWebcam')">
+                                <div class="local-video" ng-if="socketId === user.get('socketId')">
+                                    <video class="mirror" id="video-local" autoplay muted></video>
+                                </div>
+                                <div class="remote-video" ng-if="socketId !== user.get('socketId')">
+                                    <video id="video-{{user.get('socketId')}}" autoplay></video>
+                                </div>
+                            </div>
+                            <div class="audio-call-container" ng-show="!user.get('activeWebcam')">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div class="user-info">
+                                {{user.get('username')}}
+                            </div>
+                            <div class="user-muted" ng-show="user.get('muted')"></div>
+                            <div class="video-option webcam" ng-click="toggleCall('end')">
+                                <i class="fa fa-video-camera control"></i>
+                            </div>
+                            <div class="video-option microphone{{user.get('muted') ? ' muted' : ''}}" ng-click="toggleMicrophone()">
+                                <i class="fa {{user.get('muted') ? 'fa-microphone-slash' : 'fa-microphone'}} control"></i>
+                            </div>
                         </div>
-                    </div>
-                    <div class="audio-call-container" ng-show="!user.get('activeWebcam')">
-                        <i class="fa fa-user"></i>
-                    </div>
-                    <div class="user-info">
-                        {{user.get('username')}}
-                    </div>
-                    <div class="user-muted" ng-show="user.get('muted')"></div>
-                    <div class="video-option webcam" ng-click="toggleCall('end')">
-                        <i class="fa fa-video-camera control"></i>
-                    </div>
-                    <div class="video-option microphone{{user.get('muted') ? ' muted' : ''}}" ng-click="toggleMicrophone()">
-                        <i class="fa {{user.get('muted') ? 'fa-microphone-slash' : 'fa-microphone'}} control"></i>
+                        <div class="user-details" ng-show="!user.get('activeCall')">
+                            <div class="username" ng-show="!user.get('activeCall')" data-original-title="{{user.get('username')}}" tooltip>
+                                {{user.get('username')}}
+                            </div>
+                            <div class="user-options">
+                                <div class="option" ng-click="toggleCall('video')" title="Start Video Call" tooltip>
+                                    <i class="fa fa-video-camera"></i>
+                                </div>
+                                <div class="option" ng-click="toggleCall('audio')" title="Start Audio Call" tooltip>
+                                    <i class="fa fa-microphone"></i>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="user-details" ng-show="!user.get('activeCall')">
-                    <div class="username" ng-show="!user.get('activeCall')" data-original-title="{{user.get('username')}}" tooltip>
-                        {{user.get('username')}}
-                    </div>
-                    <div class="user-options">
-                        <div class="option" ng-click="toggleCall('video')" title="Start Video Call" tooltip>
-                            <i class="fa fa-video-camera"></i>
-                        </div>
-                        <div class="option" ng-click="toggleCall('audio')" title="Start Audio Call" tooltip>
-                            <i class="fa fa-microphone"></i>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <div id="chat-width"></div>
+                <div id="chat-container">
+                    <div class="row" id="chat-row-pad">
+                        <div class="col-xs-12" id="chat-col-pad">
+                            <div class="messages">
+                                <div class="chat" ng-repeat="chat in messages">
+                                    <div class="username">{{chat.username}}</div>
+                                    <div ng-if="!chat.html && !chat.report" class="message" ng-bind-html="chat.message | linky:'_blank'"></div>
+                                    <div ng-if="chat.html && !chat.report" class="message" ng-bind-html="allowHtml(chat.message)"></div>
+                                    <div ng-if="chat.report" class="message">
+                                        <div ng-if="chat.isConsensus" class="text-success">
+                                            <strong>CONSENSUS: {{chat.consensusVote}}</strong>
+                                        </div>
+                                        <table ng-if="!chat.isConsensus" class="table table-bordered">
+                                            <thead>
+                                                <tr>
+                                                    <td>Vote</td>
+                                                    <td>Count</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr ng-repeat="(vote, count) in chat.report">
+                                                    <td>{{vote}}</td>
+                                                    <td>{{count}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-
-                <!--<div class="user-options" ng-show="!user.get('activeCall')">
-                    <div class="option" ng-click="toggleCall('video')" title="Start Video Call" tooltip>
-                        <i class="fa fa-video-camera control"></i>
-                    </div>
-                    <div class="option" ng-click="toggleCall('audio')" title="Start Audio Call" tooltip>
-                        <i class="fa fa-microphone control"></i>
-                    </div>
-                </div>-->
+                <div id="send-container">
+                    <input ng-model="message" ng-enter="send()" type="text" class="form-control" placeholder="Enter Message..." />
+                </div>
             </div>
         </div>
     </div>
@@ -196,6 +234,7 @@
                         </div>
                     </div>
                     <div class="text-right grouping no-vote">
+                        <span class="pull-left">Change your vote by clicking your poker card.</span>
                         <button type="button" class="btn btn-default" ng-click="castVote('unknown')" title="Unknown" data-placement="top" tooltip>
                             <i class="fa fa-question vote-unknown"></i>
                         </button>
@@ -215,5 +254,12 @@
                 You've been disconnected from the room. Trying to reconnect...
             </div>
         </div>
+    </div>
+
+    <div id="viewport-setup">
+        <div class="visible-xs"></div>
+        <div class="visible-sm"></div>
+        <div class="visible-md"></div>
+        <div class="visible-lg"></div>
     </div>
 </div>

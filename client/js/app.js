@@ -2,7 +2,7 @@
 var debug = new Debugger('dev');
 
 // initialize the application
-var app = angular.module('poker', ['ngRoute', 'timer', 'appControllers']);
+var app = angular.module('poker', ['ngRoute', 'ngSanitize', 'timer', 'appControllers']);
 
 // initialize the controllers module
 var appControllers = angular.module('appControllers', []);

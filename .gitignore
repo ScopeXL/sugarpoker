@@ -41,3 +41,9 @@ bower_components
 
 # Database
 db.sqlite3
+
+# Server Config
+server/config.json
+
+# Client Config
+client/config.js

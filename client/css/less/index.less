@@ -336,10 +336,6 @@ body {
 
             .topic {
                 font-size: 2.5em;
-                //position: absolute;
-                //top: 0;
-                //left: 0;
-                //width: 100%;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -381,10 +377,15 @@ body {
                         text-decoration: none;
                     }
                 }
+
+                &.topic-link {
+                    border: none;
+
+                }
             }
         }
 
-        timer.countdown {
+        .countdown {
             font-size: 2.0em;
             position: relative;
             cursor: pointer;
@@ -431,6 +432,65 @@ body {
                         cursor: pointer;
                     }
                 }
+            }
+        }
+
+        #chat-container {
+            position: fixed;
+            top: 0;
+            bottom: 34px;
+            right: 0;
+            border-left: 1px solid #444;
+            //padding-left: 5px;
+            overflow: auto;
+
+            #chat-row-pad.row {
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .table-bordered {
+                border: 1px solid #444;
+
+                tr {
+                    border: 1px solid #444;
+                }
+
+                td {
+                    border: 1px solid #444;
+                    padding: 2px 8px;
+                }
+            }
+
+            .messages {
+                margin-top: 10px;
+            }
+
+            .chat {
+                margin-bottom: 5px;
+
+                .username {
+                    color: #FFFFFF;
+                }
+
+                .message {
+                    a:link, a:active, a:visited {
+                        color: #cc7b19;
+                    }
+                }
+            }
+        }
+
+        #send-container {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            input {
+                padding: 2px 4px;
+                //font-size: 0.7em;
+                background: #3a3a3a;
+                color: #FFF;
+                border: 0;
             }
         }
     }
@@ -483,6 +543,7 @@ body {
     }
 }
 
-#invite {
-
+*:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

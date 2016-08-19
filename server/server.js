@@ -2,12 +2,17 @@ var environment = 'dev';
 
 var Q = require('q');
 var app = require('express')();
+var https = require('https');
+var cheerio = require('cheerio');
+var $ = '';
 var http = require('http');
 var httpServer = http.Server(app);
 var io = require('socket.io')(httpServer, {path: '/socket/socket.io'});
 var _ = require('underscore');
+var moment = require('moment');
 var debug = require('./lib/debug')(environment);
 var db = require('./lib/db')();
+var config = require('./config.json');
 
 // Port which the HTTP Server listens for socket connections
 var httpPort = 3006;
@@ -36,6 +41,26 @@ io.on('connection', function(socket) {
         // Join the room
         joinRoom(socket.handshake.query.room);
     }
+
+    // user sends a message
+    socket.on('message:send', function(message) {
+        if (_.isEmpty(message)) {
+            return;
+        }
+
+        debug.log(
+            user.get('username') + ':', 'white',
+            message, 'cyan'
+        );
+
+        // add message to room history
+        room.addMessage(user.get('username'), message);
+
+        io.to(room.get('name')).emit('message:receive', {
+            username: user.get('username'),
+            message: message
+        });
+    });
 
     // set the webcam state of the user
     socket.on('user:call', function(data) {
@@ -84,7 +109,9 @@ io.on('connection', function(socket) {
             countdown: room.get('countdown')
         });
         // alert others in room of new countdown
-        socket.broadcast.to(room.get('name')).emit('timer:countdown', room.get('countdown'));
+        socket.broadcast.to(room.get('name')).emit('timer:countdown', {
+            countdown: room.get('countdown')
+        });
 
         debug.log(room.get('name') + ': New countdown is', 'cyan', room.get('countdown'), 'magenta', 'seconds', 'cyan');
     });
@@ -92,16 +119,46 @@ io.on('connection', function(socket) {
     // Start the timer in the room
     socket.on('timer:start', function() {
         socket.broadcast.to(room.get('name')).emit('timer:start');
+        room.set('activeCountdown', true);
+        io.to(room.get('name')).emit('room:reload', {
+            activeCountdown: room.get('activeCountdown')
+        });
     });
 
     // Stop the timer in the room
     socket.on('timer:stop', function() {
         socket.broadcast.to(room.get('name')).emit('timer:stop');
+        room.set('activeCountdown', false);
+        io.to(room.get('name')).emit('room:reload', {
+            activeCountdown: room.get('activeCountdown')
+        });
     });
 
     // Start the timer in the room
     socket.on('timer:reset', function() {
         socket.broadcast.to(room.get('name')).emit('timer:reset');
+        room.set('activeCountdown', false);
+        io.to(room.get('name')).emit('room:reload', {
+            activeCountdown: room.get('activeCountdown')
+        });
+    });
+
+    // Fetch the current timer time from a user
+    socket.on('timer:fetch', function() {
+        var usersInRoom = Users.getUsersInRoom(room.get('name'));
+        var hasRequested = false;
+
+        _.each(usersInRoom, function(u) {
+            if (!_.isEqual(u.get('socketId'), user.get('socketId')) && !hasRequested) {
+                socket.to(u.get('socketId')).emit('timer:fetch', user.get('socketId'));
+                hasRequested = true;
+            }
+        });
+    });
+
+    // User relays timer value back to requester
+    socket.on('timer:value', function(data) {
+        socket.to(data.requester).emit('timer:value', data.value);
     });
 
     // When a user elects to reveal all votes regardless of voting status
@@ -196,6 +253,52 @@ io.on('connection', function(socket) {
         socket.to(room.get('name')).emit('room:reload', {
             topic: topic
         });
+    });
+
+    // When the topic is finished, attempt fetching ticket data
+    socket.on('ticket:fetch', function() {
+        if (_.isEmpty(config.jiraCookie)) {
+            debug.log('JIRA Cookie cannot be empty', 'red');
+            return;
+        }
+
+        var post_options = {
+            host: config.jiraHost,
+            port: config.jiraPort,
+            path: config.jiraPath + room.get('topic'),
+            method: 'GET',
+            headers: {
+                'Cookie': config.jiraCookie
+            }
+        };
+
+        // Set up the request
+        var post_req = https.request(post_options, function(res) {
+            var data = '';
+            res.setEncoding('utf8');
+
+            res.on('data', function(chunk) {
+                data += chunk;
+            });
+
+            res.on('end', function() {
+                $ = cheerio.load(data);
+                var summary = $('#summary-val').text();
+                debug.log(summary, 'cyan');
+                data = '';
+
+                room.set('topicData', {
+                    summary: summary
+                });
+
+                io.in(room.get('name')).emit('room:reload', {
+                    topicData: room.get('topicData')
+                });
+            });
+
+        });
+
+        post_req.end();
     });
 
     // When a user disconnects

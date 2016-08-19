@@ -8,6 +8,8 @@ module.exports = function Room(roomName, socketId) {
         name: roomName,
         // the room topic
         topic: '',
+        // fetched topic data
+        topicData: {},
         // the owner of the room
         owner: socketId,
         // the room is invite only
@@ -15,7 +17,13 @@ module.exports = function Room(roomName, socketId) {
         // active vote
         activeVote: false,
         // countdown timer in seconds
-        countdown: 300
+        countdown: 300,
+        // countdown is active
+        activeCountdown: false,
+        // max messages to store
+        maxMessages: 50,
+        // messages (for history)
+        messages: []
     };
 
     // return room data
@@ -48,6 +56,18 @@ module.exports = function Room(roomName, socketId) {
         }
         this.details[setting] = value;
         return true;
+    };
+
+    // Add a message to the room history
+    this.addMessage = function(username, message) {
+        if (this.details.messages.length >= this.details.maxMessages) {
+            this.details.messages.splice(0, 1);
+        }
+
+        this.details.messages.push({
+            username: username,
+            message: message
+        });
     };
 
     return this;

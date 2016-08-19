@@ -32,7 +32,8 @@
     "peerjs": "^0.3.14",
     "webrtc-adapter": "gh-pages",
     "font-awesome": "^4.6.3",
-    "less": "^2.7.1"
+    "less": "^2.7.1",
+    "angular-sanitize": "^1.5.8"
   },
   "resolutions": {
     "moment": "^2.13.0",

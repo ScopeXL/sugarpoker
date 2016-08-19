@@ -1,0 +1,6 @@
+{
+    "jiraHost": "company.atlassian.net",
+    "jiraPort": "443",
+    "jiraPath": "/browse/",
+    "jiraCookie": "Insert Full JIRA Cookie"
+}

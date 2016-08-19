@@ -12,16 +12,16 @@ app.service('PeerSvc', ['UserSvc', 'SocketSvc', '$rootScope',
             if (_.isUndefined(peerId)) {
                 // generate peer ID
                 peer = new Peer({
-                    host: 'poker.roesch.io',
-                    port: 443,
+                    host: config.host,
+                    port: config.port,
                     path: '/peer',
                     debug: 0//3
                 });
             } else {
                 // assign peer ID
                 peer = new Peer(peerId, {
-                    host: 'poker.roesch.io',
-                    port: 443,
+                    host: config.host,
+                    port: config.port,
                     path: '/peer',
                     debug: 0//3
                 });

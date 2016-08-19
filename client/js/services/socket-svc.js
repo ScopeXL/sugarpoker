@@ -1,5 +1,5 @@
-app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
-    function(UserSvc, RoomSvc, $rootScope) {
+app.service('SocketSvc', ['UserSvc', 'RoomSvc', 'WindowSvc', '$rootScope',
+    function(UserSvc, RoomSvc, WindowSvc, $rootScope) {
         var socketSvc = {},
             socket;
 
@@ -14,7 +14,17 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
 
         // Initialize the socket connection
         function initSocket(username, roomId) {
-            socket = io('https://poker.roesch.io', {
+            var url;
+
+            if (_.isEqual(config.port, 443)) {
+                url = 'https://' + config.host;
+            } else if (_.isEqual(config.port, 80)) {
+                url = 'http://' + config.host;
+            } else {
+                url = 'http://' + config.host + ':' + config.port;
+            }
+
+            socket = io(url, {
                 reconnection: true,
                 query: 'room=' + roomId + '&username=' + username,
                 path: '/socket/socket.io'
@@ -56,9 +66,37 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
                 });
             });
 
+            // Receive a new message
+            socket.on('message:receive', function(data) {
+                /*data.message = data.message.replace(/((https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.-]*)*\/?)/gi,
+                    '<a href="$1">$1</a>');*/
+                $rootScope.$broadcast('message:receive', data);
+            });
+
+            // Server emits a timer tick event
+            /*socket.on('timer:tick', function(remaining) {
+                var duration = new moment.duration(remaining, 'seconds');
+                var minutes = duration.get('minutes');
+                var seconds = duration.get('seconds');
+
+                if (minutes < 10) {
+                    minutes = '0' + minutes;
+                }
+                if (seconds < 10) {
+                    seconds = '0' + seconds;
+                }
+
+                $rootScope.$broadcast('timer:tick', {
+                    remaining: remaining,
+                    minutes: minutes,
+                    seconds: seconds
+                });
+                $rootScope.$apply();
+            });*/
+
             // Set a new timer countdown
-            socket.on('timer:countdown', function(countdown) {
-                $rootScope.$broadcast('timer:countdown', countdown);
+            socket.on('timer:countdown', function(data) {
+                $rootScope.$broadcast('timer:countdown', data.countdown);
                 $rootScope.$apply();
             });
 
@@ -78,6 +116,28 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
             socket.on('timer:reset', function() {
                 $rootScope.$broadcast('timer-reset');
                 $rootScope.$apply();
+            });
+
+            // Relay timer position to the requester
+            socket.on('timer:fetch', function(requester) {
+                debug.log('Timer Fetch has been requested');
+                $rootScope.$broadcast('timer:fetch', requester);
+            });
+
+            // Timer value received from server relay
+            socket.on('timer:value', function(value) {
+                debug.log('Timer value is ' + value);
+
+                $rootScope.$broadcast('timer:countdown', value);
+                $rootScope.$apply();
+                $rootScope.$broadcast('timer-reset');
+                $rootScope.$apply();
+
+                if (RoomSvc.get('activeCountdown')) {
+                    debug.log('Countdown is active');
+                    $rootScope.$broadcast('timer-start');
+                    $rootScope.$apply();
+                }
             });
 
             // Reset voting
@@ -128,6 +188,9 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
                 RoomSvc.init(data.room);
                 // Reset the timer
                 setTimeout(function() {
+                    // Get the countdown time
+                    socketSvc.emit('timer:fetch');
+
                     $rootScope.$broadcast('timer-reset');
                     $rootScope.$apply();
                 }, 0);
@@ -138,7 +201,11 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', '$rootScope',
                 UserSvc.setLocalUser(socket.id);
 
                 $('#room-setup').fadeOut(500, function() {
-                    $('#room-details').fadeIn(500);
+                    $('#room-details').fadeIn(500, function() {
+                        debug.log('Room is ready');
+                        WindowSvc.render();
+                        $('#chat-container').scrollTop($('#chat-container').prop('scrollHeight'));
+                    });
                 });
 
                 $rootScope.$broadcast('join:success');

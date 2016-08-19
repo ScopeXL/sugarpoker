@@ -4,8 +4,10 @@ appControllers.controller('RoomCtrl', [
     'RoomSvc',
     'SocketSvc',
     'PeerSvc',
+    'WindowSvc',
     '$routeParams',
     '$location',
+    '$sce',
     '$rootScope',
 function(
     $scope,
@@ -13,8 +15,10 @@ function(
     RoomSvc,
     SocketSvc,
     PeerSvc,
+    WindowSvc,
     $routeParams,
     $location,
+    $sce,
     $rootScope) {
         // Set the username from localStorage if it exists
         $scope.username = localStorage.getItem('username');
@@ -27,6 +31,8 @@ function(
         $scope.progressLevel = 'normal';
         // Set the room name
         $scope.roomId = $routeParams.roomId;
+        // Init the messages array
+        $scope.messages = [];
 
         // If no roomId is specified, show room textbox on DOM
         if (_.isUndefined($scope.roomId)) {
@@ -35,6 +41,7 @@ function(
 
         $scope.$on('timer-reset', function(ev) {
             debug.log('Timer was reset');
+            $scope.timerCountdown = RoomSvc.get('countdown');
             $scope.timerRunning = false;
         });
 
@@ -51,6 +58,7 @@ function(
         $scope.$on('timer-tick', function(ev, data) {
             // calculate number of seconds remaining
             var secondsRemaining = data.millis / 1000;
+            $scope.countdownRemaining = secondsRemaining;
 
             if (secondsRemaining <= 0) {
                 // timer is up
@@ -82,6 +90,14 @@ function(
                 }
             }
         });
+
+        // Send a message
+        $scope.send = function() {
+            if (!_.isEmpty($scope.message)) {
+                SocketSvc.emit('message:send', $scope.message);
+                $scope.message = '';
+            }
+        };
 
         // Invite others
         $scope.inviteOthers = function() {
@@ -205,7 +221,7 @@ function(
         };
 
         // Edit the room topic
-        $scope.handleEditTopic = function(edit) {
+        $scope.handleEditTopic = function(edit, skipFetch) {
             if (edit) {
                 $scope.showEditTopic = true;
                 // force focus on the topic
@@ -213,14 +229,19 @@ function(
                     $('#input-topic').focus();
                 }, 0);
             } else {
+                debug.log('Topic editing complete');
                 $scope.showEditTopic = false;
+                if (!skipFetch) {
+                    // Fetch ticket
+                    SocketSvc.emit('ticket:fetch');
+                }
             }
         };
 
         // When the topic is changed from the input
         $scope.editTopic = function() {
             SocketSvc.emit('topic:change', RoomSvc.get('topic'));
-            //$('#countdown').attr('countdown', 300);
+
             $scope.$broadcast('timer-reset');
             SocketSvc.emit('timer:reset');
             if (!_.isEmpty(RoomSvc.get('topic'))) {
@@ -269,8 +290,25 @@ function(
             }
         };
 
+        // Allow HTML in the DOM
+        $scope.allowHtml = function(data) {
+            return $sce.trustAsHtml(data);
+        };
+
+        // New message is received
+        $scope.$on('message:receive', function(e, data) {
+            addChatMessage(data);
+        });
+
         $scope.$on('timer:countdown', function(e, countdown) {
             $scope.timerCountdown = countdown;
+        });
+
+        $scope.$on('timer:fetch', function(e, requester) {
+            SocketSvc.emit('timer:value', {
+                requester: requester,
+                value: $scope.countdownRemaining
+            });
         });
 
         $scope.$on('vote:reset', function(e, data) {
@@ -299,6 +337,8 @@ function(
             $scope.timerCountdown = RoomSvc.get('countdown');
             // Set topic
             $scope.topic = RoomSvc.get('topic');
+            // Set messages
+            $scope.messages = RoomSvc.get('messages');
 
             // Create new peer
             PeerSvc.createPeer(UserSvc.socketId);
@@ -339,6 +379,8 @@ function(
 
         // Place the users vote on their card
         function inputVotes(userVotes) {
+            var report = {};
+
             _.each(userVotes, function(voteItem) {
                 var userItem = UserSvc.getUser(voteItem.socketId);
                 if (userItem) {
@@ -348,8 +390,41 @@ function(
                         voteItem.vote = '?';
                     }
                     userItem.set('vote', voteItem.vote);
+
+                    if (_.isUndefined(report[voteItem.vote])) {
+                        report[voteItem.vote] = 1;
+                    } else {
+                        report[voteItem.vote]++;
+                    }
                 }
             });
+
+            // build the report message
+            var reportSize = _.size(report);
+            var isConsensus = reportSize === 1 ? true : false;
+            var consensusVote = 0;
+
+            if (isConsensus) {
+                _.each(report, function(item, vote) {
+                    consensusVote = vote;
+                });
+            }
+
+            addChatMessage({
+                username: 'Vote Report' + (RoomSvc.get('topic') ? ': ' + RoomSvc.get('topic') : ''),
+                message: '',
+                report: report,
+                isConsensus: isConsensus,
+                consensusVote: consensusVote
+            });
+        }
+
+        // Input chat message
+        function addChatMessage(data) {
+            $scope.messages.push(data);
+            $scope.$apply();
+
+            $('#chat-container').scrollTop($('#chat-container').prop('scrollHeight'));
         }
     }
 ]);
