@@ -424,6 +424,15 @@ body {
                 border: 0;
             }
 
+            .show-icon-hover {
+                transition: 0.5s ease-in-out opacity;
+                opacity: 0;
+            }
+
+            .icon-spacing {
+                margin-right: 5px;
+            }
+
             .timer-controls {
                 margin-top: 10px;
 
@@ -431,6 +440,12 @@ body {
                     &:hover {
                         cursor: pointer;
                     }
+                }
+            }
+
+            &:hover {
+                .show-icon-hover {
+                    opacity: 1;
                 }
             }
         }

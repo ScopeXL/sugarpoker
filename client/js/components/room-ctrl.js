@@ -33,6 +33,8 @@ function(
         $scope.roomId = $routeParams.roomId;
         // Init the messages array
         $scope.messages = [];
+        // Default alert sound to on
+        $scope.triggerAlertSound = true;
 
         // If no roomId is specified, show room textbox on DOM
         if (_.isUndefined($scope.roomId)) {
@@ -62,8 +64,10 @@ function(
 
             if (secondsRemaining <= 0) {
                 // timer is up
-                var audio = new Audio('sounds/ding.wav');
-                audio.play();
+                if ($scope.triggerAlertSound) {
+                    var audio = new Audio('sounds/ding.wav');
+                    audio.play();
+                }
             } else {
                 // calculate percentage left
                 var percentageRemaining = Math.ceil((secondsRemaining / $scope.timerCountdown) * 100);
@@ -183,7 +187,6 @@ function(
                 var acceptCustomCountdown = true;
 
                 // edit the countdown with the custom value
-                debug.log($scope.customCountdown);
                 var matchRegex = new RegExp('(\\d\\d):(\\d\\d)', 'g');
                 var matches = matchRegex.exec($scope.customCountdown);
                 if (!_.isNull(matches) && matches.length >= 3) {

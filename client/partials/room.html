@@ -46,6 +46,9 @@
                     <div class="col-xs-3">
                         <div class="countdown-container">
                             <div ng-show="!editCountdown" class="timer-controls pull-right">
+                                <span ng-click="triggerAlertSound = !triggerAlertSound" data-original-title="{{triggerAlertSound ? 'Mute Alert' : 'Unmute Alert'}}" tooltip>
+                                    <i class="fa {{triggerAlertSound ? 'fa-bell' : 'fa-bell-slash'}} control icon-spacing show-icon-hover"></i>
+                                </span>
                                 <span ng-show="!timerRunning" ng-click="pauseTimer(false)" class="glyphicon glyphicon-play control" title="Start Timer" tooltip></span>
                                 <span ng-show="timerRunning" ng-click="pauseTimer(true)" class="glyphicon glyphicon-pause control" title="Pause Timer" tooltip></span>
                             </div>
@@ -63,23 +66,31 @@
                 </div>
                 <div class="row">
                     <div class="col-xs-12">
-                        <div class="options text-right">
-                            <div class="option topic-link pull-left">
-                                <a ng-href="https://sugarcrm.atlassian.net/browse/{{room.get('topic')}}" target="_blank">
-                                    {{room.get('topicData').summary ? room.get('topicData').summary : ''}}
-                                </a>
-                            </div>
-                            <div class="option" ng-show="room.get('activeVote')">
-                                <a ng-click="revealVote()">Reveal Results</a>
-                            </div>
-                            <div class="option">
-                                <a ng-click="inviteOthers()">Invite Others</a>
-                            </div>
-                            <div class="option">
-                                <a ng-click="resetVote()">Reset</a>
-                            </div>
-                            <div class="option">
-                                <a ng-click="startVote()">Call for Vote</a>
+                        <div class="options">
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-12 col-md-7">
+                                    <div class="option topic-link pull-left">
+                                        <a ng-href="https://sugarcrm.atlassian.net/browse/{{room.get('topic')}}" target="_blank">
+                                            {{room.get('topicData').summary ? room.get('topicData').summary : ''}}
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-12 col-md-5">
+                                    <div class="text-right">
+                                        <div class="option" ng-show="room.get('activeVote')">
+                                            <a ng-click="revealVote()">Reveal Results</a>
+                                        </div>
+                                        <div class="option">
+                                            <a ng-click="inviteOthers()">Invite Others</a>
+                                        </div>
+                                        <div class="option">
+                                            <a ng-click="resetVote()">Reset</a>
+                                        </div>
+                                        <div class="option">
+                                            <a ng-click="startVote()">Call for Vote</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
