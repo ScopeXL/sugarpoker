@@ -1,5 +1,5 @@
 // Set up the console events based on environment
-var debug = new Debugger('dev');
+var debug = new Debugger(config.environment);
 
 // initialize the application
 var app = angular.module('poker', ['ngRoute', 'ngSanitize', 'timer', 'appControllers']);
