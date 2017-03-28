@@ -105,5 +105,8 @@ module.exports = function DB() {
     stmt.run(23, 'kabla2');
     stmt.finalize();*/
 
+    // Create the database tables if they don't exist
+    this.createDatabase();
+
     return this;
 };
