@@ -23,7 +23,9 @@ module.exports = function Room(roomName, socketId) {
         // max messages to store
         maxMessages: 50,
         // messages (for history)
-        messages: []
+        messages: [],
+        // vote session ID
+        voteSession: 0
     };
 
     // return room data

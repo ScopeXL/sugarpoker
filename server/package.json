@@ -10,10 +10,10 @@
     "cheerio": "^0.20.0",
     "express": "^4.13.4",
     "moment": "^2.13.0",
+    "mysql": "^2.13.0",
     "peer": "^0.2.8",
     "q": "^1.4.1",
     "socket.io": "github:socketio/socket.io",
-    "sqlite3": "^3.1.4",
     "underscore": "^1.8.3"
   }
 }

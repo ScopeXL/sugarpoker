@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html ng-app="poker">
+<html>
 <head>
     <title>Planning Poker</title>
     <base href="/">
@@ -8,11 +8,11 @@
     <link rel="stylesheet" type="text/css" href="/bower_components/font-awesome/css/font-awesome.min.css" />
     <link rel="stylesheet/less" type="text/css" href="/css/less/index.less" />
 </head>
-<body>
-    <div id="main" ng-view></div>
+<body ng-app="poker">
+    <ng-view></ng-view>
 
     <script type="text/javascript" src="/config.js"></script>
-    <script type="text/javascript" src="/bower_components/socket.io-client/socket.io.js"></script>
+    <script type="text/javascript" src="/bower_components/socket.io-client/dist/socket.io.min.js"></script>
     <script type="text/javascript" src="/bower_components/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="/bower_components/angular/angular.min.js"></script>
     <script type="text/javascript" src="/bower_components/angular-route/angular-route.min.js"></script>

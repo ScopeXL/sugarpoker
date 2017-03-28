@@ -1,29 +1,86 @@
 var Q = require('q');
 var _ = require('underscore');
 var moment = require('moment');
-var sqlite3 = require('sqlite3').verbose();
-var db = new sqlite3.Database(__dirname + '/db/db.sqlite3');
+var mysql = require('mysql');
+var config = require('../config');
 
-// Tables/Columns
-var tables = {
-    'vote_session': [
-        {name: 'id', type: 'INTEGER PRIMARY KEY'},
-        {name: 'timestamp', type: 'INTEGER'},
-        {name: 'room', type: 'TEXT'}
-    ],
-    'votes': [
-        {name: 'id', type: 'INTEGER PRIMARY KEY'},
-        {name: 'id_vote_session', type: 'INTEGER'},
-        {name: 'vote', type: 'INTEGER'}
-    ]
-};
+var pool = mysql.createPool({
+    multipleStatements: true,
+    connectionLimit: 10,
+    host: config.db_host,
+    user: config.db_user,
+    password: config.db_pass,
+    database: config.db_database
+});
 
 module.exports = function DB() {
-    // clear all previous DB data
-    dropTables();
 
-    // create the database tables
-    createTables();
+    // Create a voting session
+    this.createSession = function(data) {
+        var deferred = Q.defer();
+
+        pool.query('INSERT INTO vote_session SET ?', data, _.bind(function(err, result) {
+            if (err) {
+                throw err;
+                // deferred.reject(err);
+                // return deferred.promise;
+            }
+
+            deferred.resolve(result);
+        }), this);
+
+        return deferred.promise;
+    };
+
+    // Cast a vote
+    this.castVote = function(data) {
+        var deferred = Q.defer();
+
+        pool.query('INSERT INTO votes SET ?', data, _.bind(function(err, result) {
+            if (err) {
+                throw err;
+                // deferred.reject(err);
+                // return deferred.promise;
+            }
+
+            deferred.resolve(result);
+        }), this);
+
+        return deferred.promise;
+    };
+
+    // Cast a vote
+    this.getHistory = function(roomName) {
+        var deferred = Q.defer();
+
+        pool.query('SELECT * FROM vote_session JOIN votes ON vote_session.id = votes.vote_session_id WHERE vote_session.room = ? ORDER BY vote_session.timestamp DESC',
+            roomName, _.bind(function(err, rows, fields) {
+                if (err) {
+                    throw err;
+                }
+
+                deferred.resolve(rows);
+            }, this)
+        );
+
+        return deferred.promise;
+    };
+
+    // Create Database if not exists
+    this.createDatabase = function() {
+        // Open file to insert
+        fs.readFile(__dirname + '/sugarpoker.sql', 'utf8', function(err, data) {
+            if (err) {
+                throw err;
+            }
+
+            pool.query(data, function(err, result) {
+                if (err) {
+                    throw err;
+                }
+            });
+        });
+    };
 
     this.newVotingSession = function(room) {
         var deferred = Q.defer();
@@ -50,44 +107,3 @@ module.exports = function DB() {
 
     return this;
 };
-
-// drop tables
-function dropTables() {
-    db.serialize(function() {
-        _.each(tables, function(cols, table) {
-            db.run('DROP TABLE IF EXISTS ' + table);
-        });
-    });
-}
-
-// create tables
-function createTables() {
-    db.serialize(function() {
-        _.each(tables, function(cols, table) {
-            db.run('CREATE TABLE ' + table + ' (' + columns(cols) + ')');
-        });
-
-        /*var stmt = db.prepare('INSERT INTO votes VALUES (?, ?)');
-        for (var i = 0; i < 10; i++) {
-            stmt.run(i, 5);
-        }
-        stmt.finalize();
-
-        db.each('SELECT rowid AS id, vote FROM votes', function(err, row) {
-            console.log(row.id + ': ' + row.vote);
-        });*/
-    });
-    //db.close();
-}
-
-/**
- * Create new column string when creating new tables
- *
- * @param {Array} cols Array of objects of columns {name: 'id', type: 'INT'}
- * @return {String}
- */
-function columns(cols) {
-    return cols.map(function(elem) {
-        return elem.name + ' ' + elem.type;
-    }).join(', ');
-}

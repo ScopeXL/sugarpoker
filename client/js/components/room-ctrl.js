@@ -35,6 +35,8 @@ function(
         $scope.messages = [];
         // Default alert sound to on
         $scope.triggerAlertSound = true;
+        // History is selected
+        $scope.historyEnabled = false;
 
         // If no roomId is specified, show room textbox on DOM
         if (_.isUndefined($scope.roomId)) {
@@ -297,6 +299,22 @@ function(
         $scope.allowHtml = function(data) {
             return $sce.trustAsHtml(data);
         };
+
+        // Fetch voting history for room
+        $scope.getHistory = function() {
+            $scope.historyEnabled = !$scope.historyEnabled;
+
+            if ($scope.historyEnabled) {
+                SocketSvc.emit('history:get');
+                debug.log('Fetching History...');
+            }
+        };
+
+        $scope.$on('history:get', function(e, data) {
+            debug.log('History', data);
+            $scope.history = data;
+            $scope.$apply();
+        });
 
         // New message is received
         $scope.$on('message:receive', function(e, data) {

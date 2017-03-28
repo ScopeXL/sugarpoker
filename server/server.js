@@ -192,6 +192,15 @@ io.on('connection', function(socket) {
         if (room.get('activeVote')) {
             user.set('vote', vote);
             user.set('hasVoted', true);
+
+            // Save the vote
+            Q.when(db.castVote({
+                vote_session_id: room.get('voteSession'),
+                username: user.get('username'),
+                vote: user.get('vote')
+            })).then(function(result) {
+
+            });
             // alert others in room of their vote (exclude the actual vote until voting ends)
             socket.broadcast.to(user.get('room')).emit('user:reload', buildUserObj({
                 hasVoted: user.get('hasVoted')
@@ -213,6 +222,9 @@ io.on('connection', function(socket) {
                 debug.log(room.get('name') + ': All votes have been cast', 'green');
                 // set the room to voting ended
                 room.set('activeVote', false);
+                // reset the vote session
+                room.set('voteSession', 0);
+
                 io.to(room.get('name')).emit('room:reload', {
                     activeVote: room.get('activeVote')
                 });
@@ -225,24 +237,28 @@ io.on('connection', function(socket) {
 
     // When a user calls for a vote
     socket.on('vote:start', function() {
-        Q.when(db.newVotingSession(room.get('name'))).then(function(votingSessionId) {
-            debug.log('Voting Session:', 'cyan', votingSessionId, 'magenta');
-        });
+        Q.when(db.createSession({
+            room: room.get('name'),
+            topic: room.get('topic')
+        })).then(function(result) {
+            room.set('voteSession', result.insertId);
+            debug.log('Voting Session:', 'cyan', room.get('voteSession'), 'magenta');
 
-        // start a vote in the room
-        room.set('activeVote', true);
-        io.to(room.get('name')).emit('room:reload', {
-            activeVote: room.get('activeVote')
+            // start a vote in the room
+            room.set('activeVote', true);
+            io.to(room.get('name')).emit('room:reload', {
+                activeVote: room.get('activeVote')
+            });
+            // reset all users votes
+            var usersInRoom = Users.getUsersInRoom(room.get('name'));
+            _.each(usersInRoom, function(u) {
+                u.set('vote', null);
+                u.set('hasVoted', false);
+            })
+            // start a vote for all users in the channel
+            socket.broadcast.to(room.get('name')).emit('vote:start');
+            debug.log(room.get('name') + ': Voting has started', 'yellow');
         });
-        // reset all users votes
-        var usersInRoom = Users.getUsersInRoom(room.get('name'));
-        _.each(usersInRoom, function(u) {
-            u.set('vote', null);
-            u.set('hasVoted', false);
-        })
-        // start a vote for all users in the channel
-        socket.broadcast.to(room.get('name')).emit('vote:start');
-        debug.log(room.get('name') + ': Voting has started', 'yellow');
     });
 
     // When a user changes the topic
@@ -299,6 +315,15 @@ io.on('connection', function(socket) {
         });
 
         post_req.end();
+    });
+
+    // When a user requests voting history
+    socket.on('history:get', function() {
+        Q.when(db.getHistory(room.get('name'))).then(function(results) {
+            socket.emit('history:get', results);
+        });
+
+        debug.log(user.get('username'), 'cyan', 'is fetching history', 'yellow');
     });
 
     // When a user disconnects

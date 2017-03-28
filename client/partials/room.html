@@ -68,17 +68,20 @@
                     <div class="col-xs-12">
                         <div class="options">
                             <div class="row">
-                                <div class="col-xs-12 col-sm-12 col-md-7">
+                                <div class="col-xs-12 col-sm-12 col-md-6">
                                     <div class="option topic-link pull-left">
                                         <a ng-href="https://sugarcrm.atlassian.net/browse/{{room.get('topic')}}" target="_blank">
                                             {{room.get('topicData').summary ? room.get('topicData').summary : ''}}
                                         </a>
                                     </div>
                                 </div>
-                                <div class="col-xs-12 col-sm-12 col-md-5">
+                                <div class="col-xs-12 col-sm-12 col-md-6">
                                     <div class="text-right">
                                         <div class="option" ng-show="room.get('activeVote')">
                                             <a ng-click="revealVote()">Reveal Results</a>
+                                        </div>
+                                        <div class="option">
+                                            <a ng-click="getHistory()">History</a>
                                         </div>
                                         <div class="option">
                                             <a ng-click="inviteOthers()">Invite Others</a>
@@ -95,7 +98,23 @@
                         </div>
                     </div>
                 </div>
-                <div class="users">
+                <div class="history" ng-show="historyEnabled">
+                    <div class="row">
+                        <div class="col-xs-12 col-md-6" ng-repeat="session in history">
+                            <div class="session">
+                                <div class="topic">{{session.topic ? session.topic : 'Unknown'}}</div>
+                                <div class="datetime">{{session.datetime}}</div>
+
+                                <div class="votes">
+                                    <div class="vote" ng-repeat="vote in session.votes">
+                                        {{vote.username}} - {{vote.vote}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="users" ng-show="!historyEnabled">
                     <div class="user-container{{user.get('socketId') == socketId ? ' local' : ''}}" ng-repeat="user in users">
                         <div class="flip-container{{(voteEnd && user.get('hasVoted')) || reveal ? ' flip' : ''}}">
                             <div class="flipper">
