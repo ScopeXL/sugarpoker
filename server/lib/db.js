@@ -2,6 +2,7 @@ var Q = require('q');
 var _ = require('underscore');
 var moment = require('moment');
 var mysql = require('mysql');
+var fs = require('fs');
 var config = require('../config');
 
 var pool = mysql.createPool({
