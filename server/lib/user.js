@@ -23,7 +23,9 @@ module.exports = function User(socketId) {
         // the user has an active webcam session
         activeWebcam: false,
         // the user has muted their microphone
-        muted: true
+        muted: true,
+        // the user is in spectator mode which they won't be called to vote
+        spectator: false
     };
 
     // get a variable from the user details

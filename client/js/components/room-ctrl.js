@@ -8,6 +8,7 @@ appControllers.controller('RoomCtrl', [
     '$routeParams',
     '$location',
     '$sce',
+    '$log',
     '$rootScope',
 function(
     $scope,
@@ -19,9 +20,12 @@ function(
     $routeParams,
     $location,
     $sce,
+    $log,
     $rootScope) {
         // Set the username from localStorage if it exists
         $scope.username = localStorage.getItem('username');
+        // Spectator Mode
+        $scope.spectator = false;
         $scope.users = UserSvc.users;
         // Track room data in the DOM
         $scope.room;
@@ -115,6 +119,7 @@ function(
             if (_.isUndefined($routeParams.roomId) || $scope.noRoom) {
                 $location.path('/' + $scope.roomId);
             }
+
             SocketSvc.connect($scope.username, $scope.roomId);
         };
 
@@ -290,7 +295,10 @@ function(
 
         // Edit a users vote
         $scope.editVote = function(socketId) {
-            if (RoomSvc.get('activeVote') && _.isEqual(UserSvc.get('socketId'), socketId)) {
+            if (RoomSvc.get('activeVote') &&
+                _.isEqual(UserSvc.get('socketId'), socketId) &&
+                !UserSvc.get('spectator')
+            ) {
                 $('#vote-modal').modal('show');
             }
         };
@@ -309,6 +317,14 @@ function(
                 debug.log('Fetching History...');
             }
         };
+
+        // When the socket connects
+        $scope.$on('connect', function(e) {
+            if ($scope.spectator) {
+                // Send to the server this user only wants to spectate
+                SocketSvc.emit('user:spectator', true);
+            }
+        });
 
         $scope.$on('history:get', function(e, data) {
             debug.log('History', data);
@@ -395,7 +411,10 @@ function(
                 resetVote(options);
             }
 
-            $('#vote-modal').modal('show');
+            if (!$scope.spectator) {
+                // Only show voting modal if user is not a spectator
+                $('#vote-modal').modal('show');
+            }
         }
 
         // Place the users vote on their card
@@ -405,6 +424,10 @@ function(
             _.each(userVotes, function(voteItem) {
                 var userItem = UserSvc.getUser(voteItem.socketId);
                 if (userItem) {
+                    if (userItem.get('spectator')) {
+                        // User is a spectator, don't include in report
+                        return;
+                    }
                     if (_.isEqual(voteItem.vote, 'abstain')) {
                         voteItem.vote = 'X';
                     } else if (_.isEqual(voteItem.vote, 'unknown')) {

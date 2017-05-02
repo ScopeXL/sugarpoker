@@ -54,13 +54,40 @@ module.exports = function DB() {
     this.getHistory = function(roomName) {
         var deferred = Q.defer();
 
-        pool.query('SELECT * FROM vote_session JOIN votes ON vote_session.id = votes.vote_session_id WHERE vote_session.room = ? ORDER BY vote_session.timestamp DESC',
+        pool.query('SELECT * FROM vote_session ' +
+            'JOIN votes ON vote_session.id = votes.vote_session_id ' +
+            'WHERE vote_session.room = ? ' +
+            'ORDER BY vote_session.timestamp DESC, votes.vote_timestamp ASC',
             roomName, _.bind(function(err, rows, fields) {
                 if (err) {
                     throw err;
                 }
 
-                deferred.resolve(rows);
+                // Make new object array to send back without duplicate usernames
+                var sessions = {};
+
+                _.each(rows, function(row) {
+                    var id = row.vote_session_id;
+                    if (_.isUndefined(sessions[id])) {
+                        sessions[id] = {
+                            id: row.vote_session_id,
+                            room: row.room,
+                            topic: row.topic,
+                            timestamp: row.timestamp,
+                            datetime: moment(row.timestamp).format('MM/DD/YYYY hh:mm:ss A'),
+                            unixstamp: moment(row.timestamp).format('X'),
+                            users: {}
+                        };
+                    }
+
+                    // Overwrite the session ID username in case the user has multiple changed votes
+                    sessions[id].users[row.username] = row;
+                });
+
+                sessions = _.sortBy(sessions, function(o) { return -o.unixstamp; })
+                
+                // console.log(sessions);
+                deferred.resolve(sessions);
             }, this)
         );
 

@@ -35,6 +35,7 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', 'WindowSvc', '$rootScope',
                 UserSvc.socketId = socket.id;
 
                 $('#disconnect-overlay').fadeOut(500);
+                $rootScope.$broadcast('connect');
             });
 
             socket.on('connect_error', function() {
@@ -247,34 +248,7 @@ app.service('SocketSvc', ['UserSvc', 'RoomSvc', 'WindowSvc', '$rootScope',
 
             // History received
             socket.on('history:get', function(history) {
-                var sessions = {};
-
-                _.each(history, function(item) {
-                    if (_.isUndefined(sessions[item.vote_session_id])) {
-                        // Add the session and the first vote to it
-                        sessions[item.vote_session_id] = {
-                            room: item.room,
-                            timestamp: item.timestamp,
-                            datetime: moment(item.timestamp).format('MM/DD/YYYY hh:mm:ss A'),
-                            unixstamp: moment(item.timestamp).format('X'),
-                            topic: item.topic,
-                            votes: [{
-                                username: item.username,
-                                vote: item.vote
-                            }]
-                        };
-                    } else {
-                        // Session already exists, only add the vote
-                        sessions[item.vote_session_id].votes.push({
-                            username: item.username,
-                            vote: item.vote
-                        });
-                    }
-                });
-
-                sessions = _.sortBy(sessions, function(o) { return -o.unixstamp; })
-
-                $rootScope.$broadcast('history:get', sessions);
+                $rootScope.$broadcast('history:get', history);
             });
         }
 

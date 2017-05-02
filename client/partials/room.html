@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-xs-12">
+            <div class="col-xs-12 col-sm-6 col-sm-offset-3">
                 <div class="room-setup">
                     <form ng-submit="join()">
                         <div class="room">
@@ -23,9 +23,18 @@
                             </div>
                         </div>
                         <div class="name">
-                            <input type="text" ng-model="username" ng-change="changeUsername()" placeholder="Your Name" />
+                            <input type="text" class="form-control" ng-model="username" ng-change="changeUsername()" placeholder="Your Name" />
                         </div>
-                        <button type="submit" class="join{{!roomId ? ' disabled' : ''}}" ng-disabled="!roomId">Join</button>
+                        <div class="spectator-mode text-right">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="spectator"> Spectator Mode
+                                </label>
+                            </div>
+                        </div>
+                        <div class="join-container">
+                            <button type="submit" class="join{{!roomId ? ' disabled' : ''}}" ng-disabled="!roomId">Join</button>
+                        </div>
                     </form>
                 </div>
             </div>
@@ -89,7 +98,7 @@
                                         <div class="option">
                                             <a ng-click="resetVote()">Reset</a>
                                         </div>
-                                        <div class="option">
+                                        <div class="option" ng-show="!room.get('activeVote')">
                                             <a ng-click="startVote()">Call for Vote</a>
                                         </div>
                                     </div>
@@ -98,15 +107,16 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="history" ng-show="historyEnabled">
                     <div class="row">
-                        <div class="col-xs-12 col-md-6" ng-repeat="session in history">
+                        <div class="col-xs-12 col-sm-8 col-sm-offset-2" ng-repeat="session in history">
                             <div class="session">
                                 <div class="topic">{{session.topic ? session.topic : 'Unknown'}}</div>
                                 <div class="datetime">{{session.datetime}}</div>
 
                                 <div class="votes">
-                                    <div class="vote" ng-repeat="vote in session.votes">
+                                    <div class="vote" ng-repeat="vote in session.users">
                                         {{vote.username}} - {{vote.vote}}
                                     </div>
                                 </div>
@@ -114,11 +124,12 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="users" ng-show="!historyEnabled">
                     <div class="user-container{{user.get('socketId') == socketId ? ' local' : ''}}" ng-repeat="user in users">
                         <div class="flip-container{{(voteEnd && user.get('hasVoted')) || reveal ? ' flip' : ''}}">
                             <div class="flipper">
-                                <div class="front{{user.get('socketId') == socketId ? ' local' : ''}}" ng-click="editVote(user.get('socketId'))">
+                                <div class="front{{user.get('socketId') == socketId ? ' local' : ''}}{{user.get('spectator') ? ' spectator' : ''}}" ng-click="editVote(user.get('socketId'))">
                                     <div ng-show="!user.get('hasVoted')">Poker</div>
                                     <div ng-show="user.get('hasVoted')" class="user-voted">
                                         <span class="glyphicon glyphicon-ok"></span>
@@ -167,6 +178,7 @@
                         </div>
                     </div>
                 </div>
+
             </div>
             <div class="col-xs-12 col-sm-12 col-md-3">
                 <div id="chat-width"></div>

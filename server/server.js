@@ -62,6 +62,23 @@ io.on('connection', function(socket) {
         });
     });
 
+    // the user only wants to spectate
+    socket.on('user:spectator', function(isSpectator) {
+        if (isSpectator) {
+            user.set('spectator', true);
+
+            io.to(user.get('room')).emit('user:reload', buildUserObj({
+                spectator: user.get('spectator')
+            }));
+
+            debug.log(
+                room.get('name') + ':', 'cyan',
+                user.get('username'), 'white',
+                'is now a spectator', 'magenta'
+            );
+        }
+    });
+
     // set the webcam state of the user
     socket.on('user:call', function(data) {
         if (!_.isUndefined(data)) {
@@ -212,8 +229,10 @@ io.on('connection', function(socket) {
             // Check if everyone in the room has voted
             var allVotesCast = true,
                 usersInRoom = Users.getUsersInRoom(room.get('name'));
+
             _.each(usersInRoom, function(u) {
-                if (!u.get('hasVoted')) {
+                // Only count a user for voting if they aren't a spectator
+                if (!u.get('hasVoted') && !u.get('spectator')) {
                     allVotesCast = false;
                 }
             });

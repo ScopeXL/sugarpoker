@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Mar 28, 2017 at 04:12 PM
+-- Generation Time: May 02, 2017 at 04:05 PM
 -- Server version: 5.7.16
 -- PHP Version: 5.6.29
 
@@ -31,8 +31,9 @@ CREATE TABLE IF NOT EXISTS `votes` (
   `vote_session_id` int(11) NOT NULL,
   `username` varchar(255) DEFAULT NULL,
   `vote` varchar(255) NOT NULL DEFAULT 'unknown',
+  `vote_timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -46,7 +47,7 @@ CREATE TABLE IF NOT EXISTS `vote_session` (
   `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `topic` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
